@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <title>Prueba de librerías en cliente</title>
+    <script src="requester.js"></script>
+  </head>
+  <body>
+    <script>
+      var url = "http://opendata.aragon.es/render/resource/Directorio Central de Empresas (DIRCE).json";
+      /*
+      od2v.requester("GET", url, null, {}, null, function(err, data, resHeaders) {
+          if (err) { return console.warn(err) }
+          console.log(data.length, typeof data);
+      });
+      */
+      od2v.get(url, function(err, data, resHeaders) {
+          if (err) { return console.warn(err) }
+          console.log(data.length, typeof data);
+      });
+    </script>
+  </body>
+</html>

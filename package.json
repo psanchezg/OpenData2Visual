@@ -1,0 +1,25 @@
+{
+  "name": "opendata2visual",
+  "version": "0.0.1",
+  "description": "Javascript libraries for retrieve, parse, analize and visualize open data. For both nodejs and the browser",
+  "main": "test.js",
+  "scripts": {
+    "test1": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/psanchezg/OpenData2Visual.git"
+  },
+  "keywords": [
+    "OpenData"
+  ],
+  "author": "Pablo Sánchez",
+  "license": "Apache License",
+  "readmeFilename": "README.md",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "coffe-script": "~1.6.3",
+    "node-static": "~0.7.3"
+  }
+}
