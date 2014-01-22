@@ -50,7 +50,7 @@ angular.module('app', ['components'])
   
   $scope.show = function(idx) {
     $scope.showTotal = $scope.showTotalCol = false;
-    $scope.selected = $scope.tables[idx];
+    $scope.selected = angular.copy($scope.tables[idx]);
   }
   
   var sumarFilas = function(mtx, dest) {
