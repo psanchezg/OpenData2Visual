@@ -78,6 +78,9 @@
       return str.replace(new RegExp(/^\s+|\s+$/g), "");
     };
     cleanSep = function(str) {
+      if (typeof str !== "string") {
+        return str;
+      }
       return trim(str.substring(str.indexOf(":") + 1));
     };
     isIndexTable = function(table) {
@@ -95,7 +98,7 @@
       sum = 0;
       i = 1;
       while (i < sortarr.length) {
-        sum += sortarr[i];
+        if (!isNaN(Number(sortarr[i]))) { sum += sortarr[i]; }
         i++;
       }
       if (sum === sortarr[0]) {
@@ -122,83 +125,98 @@
       });
       return transpose;
     };
-    extractTables = function(jsondata) {
+    extractTables = function(jsondata, cb) {
       var tables;
-      tables = [];
-      forEach(jsondata, (function(value, key) {
-        var col, j, len, trans;
-        if (!value.rows) {
-          return;
-        }
-        this.push({
-          fue: "",
-          tit: "",
-          uni: "",
-          tot: [],
-          dim: [[], []],
-          dat: []
-        });
-        len = 0;
-        forEach(value.rows, (function(row) {
-          var k;
-          if (!row.values || row.values.length < 2 || (!this.tit && !row.values[0])) {
+      try {
+        tables = [];
+        forEach(jsondata, (function(value, key) {
+          var col, j, len, trans;
+          if (!value.rows) {
             return;
           }
-          if (!this.uni && this.tit) {
-            this.uni = cleanSep(row.values[0]);
-          }
-          if (!this.tit) {
-            this.tit = row.values[0];
-          }
-          if (len > 1 && !row.values[1] && !this.fue) {
-            this.fue = cleanSep(row.values[0]);
-          }
-          if ("" === trim(row.values[1])) {
-            return;
-          }
-          len++;
-          k = 0;
-          return forEach(row.values, (function(col, k) {
-            if (len === 1) {
-              if (k > 0) {
-                return this.dim[1].push(trim(col));
-              }
-            } else {
-              if (k === 0) {
-                if (trim(col)) {
-                  return this.dim[0].push(trim(col));
+          this.push({
+            fue: "",
+            tit: "",
+            uni: "",
+            tot: [],
+            dim: [[], []],
+            dat: []
+          });
+          len = 0;
+          forEach(value.rows, (function(row) {
+            var k;
+            if (!row.values || row.values.length < 2 || (!this.tit && !row.values[0])) {
+              return;
+            }
+            if (!this.uni && this.tit) {
+              this.uni = cleanSep(row.values[0]);
+            }
+            if (!this.tit) {
+              this.tit = row.values[0];
+            }
+            if (len > 1 && !row.values[1] && !this.fue) {
+              this.fue = cleanSep(row.values[0]);
+            }
+            if ("" === trim(row.values[1])) {
+              return;
+            }
+            len++;
+            k = 0;
+            return forEach(row.values, (function(col, k) {
+              if (len === 1) {
+                if (k > 0) {
+                  return this.dim[1].push(trim(col));
                 }
               } else {
-                if (!this.dat[len - 2]) {
-                  this.dat[len - 2] = [];
+                if (k === 0) {
+                  if (trim(col)) {
+                    return this.dim[0].push(trim(col));
+                  }
+                } else {
+                  if (!this.dat[len - 2]) {
+                    this.dat[len - 2] = [];
+                  }
+                  return this.dat[len - 2].push(col);
                 }
-                return this.dat[len - 2].push(col);
               }
+            }), this);
+          }), tables[tables.length - 1]);
+          if (!isIndexTable(tables[tables.length - 1])) {
+            return delete tables[tables.length - 1];
+          } else {
+            j = removeTotal(tables[tables.length - 1].dat);
+            if (j !== null) {
+              col = tables[tables.length - 1].dim[1].splice(j, 1);
+              tables[tables.length - 1].tot[1] = col;
             }
-          }), this);
-        }), tables[tables.length - 1]);
-        if (!isIndexTable(tables[tables.length - 1])) {
-          return delete tables[tables.length - 1];
+            trans = transposeMtx(tables[tables.length - 1].dat);
+            j = removeTotal(trans);
+            if (j !== null) {
+              tables[tables.length - 1].dat.splice(j, 1);
+              col = tables[tables.length - 1].dim[0].splice(j, 1);
+              return tables[tables.length - 1].tot[0] = col;
+            }
+          }
+        }), tables);
+        if (cb) {
+          return cb(null, tables.filter(function(x) {
+            return x;
+          }));
         } else {
-          j = removeTotal(tables[tables.length - 1].dat);
-          if (j !== null) {
-            col = tables[tables.length - 1].dim[1].splice(j, 1);
-            tables[tables.length - 1].tot[1] = col;
-          }
-          trans = transposeMtx(tables[tables.length - 1].dat);
-          j = removeTotal(trans);
-          if (j !== null) {
-            tables[tables.length - 1].dat.splice(j, 1);
-            col = tables[tables.length - 1].dim[0].splice(j, 1);
-            return tables[tables.length - 1].tot[0] = col;
-          }
+          return tables.filter(function(x) {
+            return x;
+          });
         }
-      }), tables);
-      return tables.filter(function(x) {
-        return x;
-      });
+      } catch (err) {
+        if (cb) {
+          return cb(err);
+        } else {
+          return err;
+        }
+      }
     };
-    return this[namespace].extractTables = extractTables;
+    this[namespace].extractTables = extractTables;
+    return this[namespace].transposeMtx = transposeMtx;
   })();
 
 }).call(this);

@@ -53,6 +53,7 @@
     str.replace new RegExp(/^\s+|\s+$/g), ""
 
   cleanSep = (str) ->
+    return str  unless typeof str is "string"
     return trim str.substring(str.indexOf(":")+1)
   
   isIndexTable = (table) ->
@@ -67,7 +68,9 @@
     sum = 0
     i = 1
     while i < sortarr.length
-      sum += sortarr[i]
+      if not isNaN(Number(sortarr[i]))
+        sum += sortarr[i]
+
       i++
     
     if sum is sortarr[0]
@@ -80,78 +83,87 @@
     return j;
   
   transposeMtx = (mtx) ->
-    #console.log "ORIG", mtx
     transpose = [new Array(mtx.length)]
     forEach mtx, (row, i) ->
       forEach row, (col, j) ->
         transpose[j] ?= []
         transpose[j][i] = mtx[i][j]
     
-    #console.log "TRANSPOSED", transpose
     transpose
   
-  extractTables = (jsondata) ->
-    tables = []
-    forEach jsondata, ((value, key) ->
-      if not value.rows
-        return
-
-      @push
-        fue: ""
-        tit: ""
-        uni: ""
-        tot: []
-        dim: [[], []]
-        dat: []
-
-      len = 0
-      forEach value.rows, ((row) ->
-        if not row.values or row.values.length < 2 or (not @.tit and not row.values[0])
+  extractTables = (jsondata, cb) ->
+    try
+      tables = []
+      forEach jsondata, ((value, key) ->
+        if not value.rows
           return
+
+        @push
+          fue: ""
+          tit: ""
+          uni: ""
+          tot: []
+          dim: [[], []]
+          dat: []
+
+        len = 0
+        forEach value.rows, ((row) ->
+          if not row.values or row.values.length < 2 or (not @.tit and not row.values[0])
+            return
         
-        @.uni = cleanSep(row.values[0]) if not @.uni and @.tit
-        @.tit = row.values[0] if not @.tit
-        @.fue = cleanSep(row.values[0]) if len > 1 and not row.values[1] and not @.fue
+          @.uni = cleanSep(row.values[0]) if not @.uni and @.tit
+          @.tit = row.values[0] if not @.tit
+          @.fue = cleanSep(row.values[0]) if len > 1 and not row.values[1] and not @.fue
         
-        if "" is trim(row.values[1])
-          return
+          if "" is trim(row.values[1])
+            return
         
-        len++
-        k = 0
-        forEach row.values, ((col, k) ->
-          if len == 1
-            if k > 0
-              @.dim[1].push trim(col)
-          else
-            if k == 0
-              if trim(col)
-                @dim[0].push trim(col)
+          len++
+          k = 0
+          forEach row.values, ((col, k) ->
+            if len == 1
+              if k > 0
+                @.dim[1].push trim(col)
             else
-              if not @dat[len-2]
-                @dat[len-2] = []
+              if k == 0
+                if trim(col)
+                  @dim[0].push trim(col)
+              else
+                if not @dat[len-2]
+                  @dat[len-2] = []
 
-              @dat[len-2].push col
+                @dat[len-2].push col
                         
-        ), @
+          ), @
         
-      ), tables[tables.length-1]
-      if not isIndexTable tables[tables.length-1]
-        delete tables[tables.length-1]
+        ), tables[tables.length-1]
+        if not isIndexTable tables[tables.length-1]
+          delete tables[tables.length-1]
+        else
+          j = removeTotal tables[tables.length-1].dat
+          if j isnt null
+            col = tables[tables.length-1].dim[1].splice j, 1
+            tables[tables.length-1].tot[1] = col
+      
+          trans = transposeMtx tables[tables.length-1].dat
+          j = removeTotal trans
+          if j isnt null
+            tables[tables.length-1].dat.splice j, 1
+            col = tables[tables.length-1].dim[0].splice j, 1
+            tables[tables.length-1].tot[0] = col
+      
+      ), tables
+      if cb
+        cb(null, tables.filter (x) -> x)
       else
-        j = removeTotal tables[tables.length-1].dat
-        if j isnt null
-          col = tables[tables.length-1].dim[1].splice j, 1
-          tables[tables.length-1].tot[1] = col
-      
-        trans = transposeMtx tables[tables.length-1].dat
-        j = removeTotal trans
-        if j isnt null
-          tables[tables.length-1].dat.splice j, 1
-          col = tables[tables.length-1].dim[0].splice j, 1
-          tables[tables.length-1].tot[0] = col
-      
-    ), tables
-    tables.filter (x) -> x
+        tables.filter (x) -> x
+
+    catch err
+      if cb
+        cb(err)
+      else
+        err
 
   @[namespace].extractTables = extractTables
+  @[namespace].transposeMtx = transposeMtx
 )()
