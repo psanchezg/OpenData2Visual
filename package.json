@@ -19,7 +19,7 @@
   "dependencies": {
   },
   "devDependencies": {
-    "coffe-script": "~1.6.3",
+    "coffee-script": "~1.6.3",
     "node-static": "~0.7.3"
   }
 }

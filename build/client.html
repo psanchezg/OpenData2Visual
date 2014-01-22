@@ -2,10 +2,13 @@
   <head>
     <title>Prueba de librerías en cliente</title>
     <script src="requester.js"></script>
+    <script src="mapper.js"></script>
   </head>
   <body>
+    <h1>Prueba de librerías en cliente</h1>
     <script>
-      var url = "http://opendata.aragon.es/render/resource/Directorio Central de Empresas (DIRCE).json";
+      var url = "data/DIRCE2012.json";
+      //url = "http://opendata.aragon.es/render/resource/Directorio%20Central%20de%20Empresas%20(DIRCE)%202012.json";
       /*
       od2v.requester("GET", url, null, {}, null, function(err, data, resHeaders) {
           if (err) { return console.warn(err) }
@@ -14,7 +17,11 @@
       */
       od2v.get(url, function(err, data, resHeaders) {
           if (err) { return console.warn(err) }
-          console.log(data.length, typeof data);
+          var tables = od2v.extractTables(data);
+          console.log("TABLES", tables.length);
+          console.log(tables[tables.length-1]);
+          console.log(tables[0]);
+
       });
     </script>
   </body>

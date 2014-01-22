@@ -9,4 +9,6 @@ require('http').createServer(function (request, response) {
         //
         file.serve(request, response);
     }).resume();
-}).listen(process.env.PORT, process.env.IP);
+}).listen(process.env.PORT || 8080, process.env.IP || 'localhost', function() {
+  console.log("Listening at "+(process.env.PORT || 8080)+"...");
+});
