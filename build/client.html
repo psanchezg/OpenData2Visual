@@ -1,13 +1,16 @@
 <html>
   <head>
     <title>Prueba de librerías en cliente</title>
+    <script src="common.js"></script>
     <script src="requester.js"></script>
     <script src="mapper.js"></script>
+    <script src="analyzers.js"></script>
   </head>
   <body>
     <h1>Prueba de librerías en cliente</h1>
     <script>
-      var url = "data/DIRCE2012.json";
+      var file = "DIRCE2012.json";
+      var url = "data/"+file;
       //url = "http://opendata.aragon.es/render/resource/Directorio%20Central%20de%20Empresas%20(DIRCE)%202012.json";
       /*
       od2v.requester("GET", url, null, {}, null, function(err, data, resHeaders) {
@@ -15,13 +18,34 @@
           console.log(data.length, typeof data);
       });
       */
-      od2v.get(url, function(err, data, resHeaders) {
+      od2v.get(url, function(err, jsondata, resHeaders) {
+        if (err) { return console.warn(err) }
+        od2v.get("config.json", function(err, cfg, resHeaders) {
           if (err) { return console.warn(err) }
-          var tables = od2v.extractTables(data);
-          console.log("TABLES", tables.length);
-          console.log(tables[tables.length-1]);
-          console.log(tables[0]);
-
+          console.log(cfg[file]);
+          if (cfg[file]) {
+            // usar el mapper que recomienda la configuracion
+            od2v[cfg[file].mapper] = od2v; // De momento solo hay uno
+            if (od2v[cfg[file].mapper]) {
+              tables = od2v[cfg[file].mapper].extractTables(jsondata);
+              if (!tables[0]) {
+                tables = tables[1];
+                console.log("MAPPER:", tables.length);
+                od2vcommon.forEach(cfg[file].analyzers, function(key) {
+                  console.log("KEY", key);
+                  if (od2v[key]) {
+                    console.log("PROCESSING", key)
+                    tables = od2v[key](tables);
+                  }
+                });
+                console.log("ANALYZED:", tables.length);
+                console.log(tables[0], tables[0].dat.length);
+      
+                //console.log(tables[tables.length-1]);
+              }
+            }
+          }
+        });
       });
     </script>
   </body>
