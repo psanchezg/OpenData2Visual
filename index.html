@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
-    <!-- <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script> -->
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.min.js"></script>
     <script src="js/angular-locale_es-es.js"></script>
+    <script src="common.js"></script>
     <script src="requester.js"></script>
     <script src="mapper.js"></script>
+    <script src="analyzers.js"></script>
     <script src="js/demo.js"></script>
     <style>
       /* Sticky footer styles
@@ -38,6 +41,7 @@
       .container .text-muted {
         margin: 20px 0;
       }
+      .table>thead>tr>.success,.table>tbody>tr>.success,.table>tfoot>tr>.success,.table>thead>.success>td,.table>tbody>.success>td,.table>tfoot>.success>td,.table>thead>.success>th,.table>tbody>.success>th,.table>tfoot>.success>th{background-color:#dff0d8!important}
     </style>
   </head>
   <body ng-controller="DemoCtrl">
@@ -48,6 +52,35 @@
         </div>
         <p class="lead">Selecciona un origen de datos y genera tus tablas.</p>
         <form role="form" name="form" ng-submit="start()">
+          <div class="form-group">
+            <label for="origenes">Orígenes parcialmente comprobados <small>(susceptibles de errores en sumatorios y analizadores)</small></label>
+            <div class="input-group">
+              <div class="btn-group">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    DIRCE
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202001.json')">Año 2001</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202002.json')">Año 2002</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202003.json')">Año 2003</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202004.json')">Año 2004</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202005.json')">Año 2005</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202006.json')">Año 2006</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202007.json')">Año 2007</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202008.json')">Año 2008</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202009.json')">Año 2009</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202010.json')">Año 2010</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202011.json')">Año 2011</a></li>
+                    <li><a ng-click="setUrl('Directorio%20Central%20de%20Empresas%20(DIRCE)%202012.json')">Año 2012</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <span class="help-block">No todas funcionarán. Ayudanos reportando las que no funcionen correctamente para arreglar los mapeadores</span>
+            <span class="text-danger" ng-show="error">{{error}}</span>
+          </div>
           <div class="form-group" ng-class="{error: form.openurl.$invalid}">
             <label for="openurl">URL <small>(desde <a href="http://opendata.aragon.es/dataset" target="_blank" title="Busca los datos que te interesen en la página del proyecto">opendata.aragon.es</a>)</small></label>
             <div class="input-group">
@@ -67,6 +100,8 @@
         </ul>
         <div ng-show="selected">
           <h2>{{selected.tit}}</h2>
+          <p><span class="label label-info">Fuente</span> {{selected.fue}}</p>
+          <p><span class="label label-default">Unidad</span> {{selected.uni}}</p>
           <div class="checkbox">
             <label>
               <input type="checkbox" ng-model="showTotal"> Mostrar total de filas
@@ -82,13 +117,13 @@
               <thead>
                 <tr>
                   <th></th>
-                  <th ng-repeat="hcol in selected.dim[1] track by $index">{{hcol}}</th>
+                  <th ng-repeat="hcol in selected.dim[1] track by $index" class="{{selected.cls[1][$index]}}">{{hcol}}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="row in selected.dat track by $index">
+                <tr ng-repeat="row in selected.dat track by $index" class="{{selected.cls[0][$index]}}">
                   <th>{{selected.dim[0][$index]}}</th>
-                  <td ng-repeat="col in row track by $index">{{col | numberOrStr}}</td>
+                  <td ng-repeat="col in row track by $index" class="{{selected.cls[1][$index]}}">{{col | numberOrStr}}</td>
                 </tr>
               </tbody>
             </table>
