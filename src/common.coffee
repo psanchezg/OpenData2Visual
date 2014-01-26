@@ -82,6 +82,7 @@
   @[namespace].cleanSep = cleanSep
   @[namespace].transposeMtx = transposeMtx
   @[namespace].isArray = isArray
+  @[namespace].isString = isString
   @[namespace].sumRows = sumRows
 
 )()

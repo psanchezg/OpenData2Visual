@@ -96,7 +96,7 @@
         <hr>
         <h1>Tablas recuperadas ({{tables.length}})</h1>
         <ul>
-          <li ng-repeat="table in tables track by $index"><a ng-click="show($index)" title="Mostrar tabla">{{table.tit}}</a></li>
+          <li ng-repeat="table in tables track by $index"><a ng-click="show($index)" title="Mostrar tabla"><strong>{{table.tit}}</strong> <small>({{table.fue}})</small></a></li>
         </ul>
         <div ng-show="selected">
           <h2>{{selected.tit}}</h2>

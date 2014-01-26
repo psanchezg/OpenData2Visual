@@ -11,6 +11,7 @@
   forEach = @[namespace + "common"].forEach || fakeFn()
   transposeMtx = @[namespace + "common"].transposeMtx || fakeFn()
   isArray = @[namespace + "common"].isArray  || fakeFn()
+  isString = @[namespace + "common"].isString  || fakeFn()
 
   isntIndexTable = (table) ->
     table.dim[0] and table.dat and table.dim[0].length is table.dat.length and table.dim[1] and table.dat[0] and table.dim[1].length is table.dat[0].length
@@ -80,7 +81,8 @@
     forEach table.dim[0], ((row, idx) ->
       new_dims.push row
       new_dat.push table.dat[idx]
-      cnae = row.substring(0, row.indexOf(" "))
+      console.log "ROW", typeof row, row
+      cnae = (if (row and isString(row)) then row.substring(0, row.indexOf(" ")) else row)
       if not isNaN(Number(cnae))
         # Es un cnae. agrupar
         if cnae.length == 2

@@ -115,6 +115,7 @@
     this[namespace].cleanSep = cleanSep;
     this[namespace].transposeMtx = transposeMtx;
     this[namespace].isArray = isArray;
+    this[namespace].isString = isString;
     return this[namespace].sumRows = sumRows;
   })();
 

@@ -86,7 +86,7 @@ angular.module('app', ['components'])
             }
           });
           if (!found) {
-              process(jsondata, cfg[cfgkey]);
+              process(jsondata, cfg[Object.keys(cfg)[0]]);
           }
         });
       });
