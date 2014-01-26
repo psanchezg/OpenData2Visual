@@ -76,6 +76,7 @@
     order = 0
     new_dims = []
     new_dat = []
+    has_subgroups = false;
     forEach table.dim[0], ((row, idx) ->
       new_dims.push row
       new_dat.push table.dat[idx]
@@ -96,27 +97,29 @@
             new_dat.splice new_dat.length-1, 1
         else if cnae.length == 3
           # Es un subgrupo. añadir elementos
+          has_subgroups = true
           cnae = cnae.substring(0,2)
           @[Number(cnae)].from = Math.min(@[Number(cnae)].from, idx-order)
           @[Number(cnae)].to = Math.max(@[Number(cnae)].to, idx-order)
     ), groups
-    table.dim[0] = new_dims
-    table.dat = new_dat
+
+    if has_subgroups
+        table.dim[0] = new_dims
+        table.dat = new_dat
     
-    if groups.length == 0
-        table
+        if groups.length == 0
+            table
         
-    # Clean nulls
-    groups = groups.filter (x) -> x
-    # Sort
-    sortarr = groups.sort((a, b) ->
-      a.order - b.order
-    )
-    if not table.tot[0]
-      table.tot[0] = []
-    forEach groups, ((group, idx) ->
-      @.push [group.title, group.from, group.to]
-    ), table.tot[0]
+        # Clean nulls
+        groups = groups.filter (x) -> x
+        # Sort
+        sortarr = groups.sort((a, b) ->
+          a.order - b.order
+        )
+        forEach groups, ((group, idx) ->
+          @.push [group.title, group.from, group.to]
+        ), table.tot[0]
+
     table
 
   groupCNAE2009  = (tables) ->

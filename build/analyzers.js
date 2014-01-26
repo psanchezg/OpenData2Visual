@@ -84,11 +84,12 @@
       return filtered;
     };
     groupCNAE2009Table = function(table) {
-      var groups, new_dat, new_dims, order, sortarr;
+      var groups, has_subgroups, new_dat, new_dims, order, sortarr;
       groups = [];
       order = 0;
       new_dims = [];
       new_dat = [];
+      has_subgroups = false;
       forEach(table.dim[0], (function(row, idx) {
         var cnae, obj;
         new_dims.push(row);
@@ -109,29 +110,29 @@
               return new_dat.splice(new_dat.length - 1, 1);
             }
           } else if (cnae.length === 3) {
+            has_subgroups = true;
             cnae = cnae.substring(0, 2);
             this[Number(cnae)].from = Math.min(this[Number(cnae)].from, idx - order);
             return this[Number(cnae)].to = Math.max(this[Number(cnae)].to, idx - order);
           }
         }
       }), groups);
-      table.dim[0] = new_dims;
-      table.dat = new_dat;
-      if (groups.length === 0) {
-        table;
+      if (has_subgroups) {
+        table.dim[0] = new_dims;
+        table.dat = new_dat;
+        if (groups.length === 0) {
+          table;
+        }
+        groups = groups.filter(function(x) {
+          return x;
+        });
+        sortarr = groups.sort(function(a, b) {
+          return a.order - b.order;
+        });
+        forEach(groups, (function(group, idx) {
+          return this.push([group.title, group.from, group.to]);
+        }), table.tot[0]);
       }
-      groups = groups.filter(function(x) {
-        return x;
-      });
-      sortarr = groups.sort(function(a, b) {
-        return a.order - b.order;
-      });
-      if (!table.tot[0]) {
-        table.tot[0] = [];
-      }
-      forEach(groups, (function(group, idx) {
-        return this.push([group.title, group.from, group.to]);
-      }), table.tot[0]);
       return table;
     };
     groupCNAE2009 = function(tables) {
