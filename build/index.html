@@ -8,8 +8,10 @@
     <!-- <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script> -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.min.js"></script>
     <script src="js/angular-locale_es-es.js"></script>
+    <script src="common.js"></script>
     <script src="requester.js"></script>
     <script src="mapper.js"></script>
+    <script src="analyzers.js"></script>
     <script src="js/demo.js"></script>
     <style>
       /* Sticky footer styles
@@ -38,6 +40,7 @@
       .container .text-muted {
         margin: 20px 0;
       }
+      .table>thead>tr>.success,.table>tbody>tr>.success,.table>tfoot>tr>.success,.table>thead>.success>td,.table>tbody>.success>td,.table>tfoot>.success>td,.table>thead>.success>th,.table>tbody>.success>th,.table>tfoot>.success>th{background-color:#dff0d8!important}
     </style>
   </head>
   <body ng-controller="DemoCtrl">
@@ -67,6 +70,8 @@
         </ul>
         <div ng-show="selected">
           <h2>{{selected.tit}}</h2>
+          <p><span class="label label-info">Fuente</span> {{selected.fue}}</p>
+          <p><span class="label label-default">Unidad</span> {{selected.uni}}</p>
           <div class="checkbox">
             <label>
               <input type="checkbox" ng-model="showTotal"> Mostrar total de filas
@@ -82,13 +87,13 @@
               <thead>
                 <tr>
                   <th></th>
-                  <th ng-repeat="hcol in selected.dim[1] track by $index">{{hcol}}</th>
+                  <th ng-repeat="hcol in selected.dim[1] track by $index" class="{{selected.cls[1][$index]}}">{{hcol}}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="row in selected.dat track by $index">
+                <tr ng-repeat="row in selected.dat track by $index" class="{{selected.cls[0][$index]}}">
                   <th>{{selected.dim[0][$index]}}</th>
-                  <td ng-repeat="col in row track by $index">{{col | numberOrStr}}</td>
+                  <td ng-repeat="col in row track by $index" class="{{selected.cls[1][$index]}}">{{col | numberOrStr}}</td>
                 </tr>
               </tbody>
             </table>

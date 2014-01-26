@@ -42,7 +42,7 @@ if (cfg[file]) {
         }
       });
       console.log("ANALYZED:", tables.length);
-      console.log(tables[0], tables[0].dat.length);
+      console.log(tables[0].tot, tables[0].dat.length);
         
       //console.log(tables[tables.length-1]);
     }

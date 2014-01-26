@@ -25,6 +25,7 @@
           tit: ""
           uni: ""
           dim: [[], []]
+          tot: [[], []]
           dat: []
 
         len = 0
@@ -34,7 +35,7 @@
         
           @.uni = cleanSep(row.values[0]) if not @.uni and @.tit
           @.tit = row.values[0] if not @.tit
-          @.fue = cleanSep(row.values[0]) if len > 1 and not row.values[1] and not @.fue
+          @.fue = cleanSep(row.values[0]) if len > 1 and row.values[1] == "" and not @.fue
         
           if "" is trim(row.values[1])
             return
