@@ -10,7 +10,6 @@ angular.module('components', [])
   }]);
 
 angular.module('app', ['components'])
-
 .controller('DemoCtrl', ['$scope', function($scope) {
   var selIdx = null;
   var init = function() {
@@ -21,6 +20,11 @@ angular.module('app', ['components'])
   };
   init();
   
+  $scope.setUrl = function(url) {
+    $scope.url = "http://opendata.aragon.es/render/resource/"+url;
+    //focus('focusMe');
+    angular.element('input[autofocus]:visible:first').trigger('focus');
+  }
   var process = function(jsondata, cfg) {
     // usar el mapper que recomienda la configuracion
     od2v[cfg.mapper] = od2v; // De momento solo hay uno
@@ -115,7 +119,7 @@ angular.module('app', ['components'])
   var sumCols = function(mtx, dest, i, j) {
     i = angular.isUndefined(i) ? 0 : i;
     j = angular.isUndefined(j) ? mtx.length-1 : j;
-    var sum;
+    var sum, totsum = 0;
     angular.forEach(mtx[i], function(col, idx) {
       sum = 0;
       for (var k=i; k<=j; k++) {
@@ -123,9 +127,10 @@ angular.module('app', ['components'])
         if (!isNaN(Number(mtx[k][idx]))) { sum += mtx[k][idx]; }
       };
       dest.push(sum);
+      totsum += sum;
     });
     if ($scope.showTotal) {
-      dest.push("-");
+      dest.push(totsum);
     }
   };
   
@@ -141,25 +146,21 @@ angular.module('app', ['components'])
             // Crear total
             $scope.selected.tot[0].push(["Total"]);
         }
-        var inserts = -1;
+        var inserts = -1, insertAt;
         angular.forEach($scope.selected.tot[0], function(tot, idx) {
-            // TODO: si hay mas totales en la tabla???
             if (tot.length == 1) {
-                // SUmatorio total
-                $scope.selected.dat.push([]);
-                var len = $scope.selected.dat.length-1;
-                $scope.selected.dim[0].push(tot[0]);
-                $scope.selected.cls[0][$scope.selected.dim[0].length-1] = "success";
-                var transpose = od2v.transposeMtx($scope.selected.dat);
-                sumRows(transpose, $scope.selected.dat[len]);
+                tot = angular.copy(tot);
+                tot.push(1);
+                tot.push($scope.tables[selIdx].dat.length);
+                insertAt = $scope.selected.dat.length;
             } else {
-                // Sumar con indices y añadir en filas
-                $scope.selected.dim[0].splice(tot[1]+inserts, 0, tot[0]);
-                $scope.selected.cls[0][tot[1]+inserts] = "success";
-                $scope.selected.dat.splice(tot[1]+inserts, 0, []);
-                sumCols($scope.tables[selIdx].dat, $scope.selected.dat[tot[1]+inserts], tot[1]-1, tot[2]-1); // Depende de si se ha quitado el total
-                inserts++;
+                insertAt = tot[1]+inserts;
             }
+            $scope.selected.dim[0].splice(insertAt, 0, tot[0]);
+            $scope.selected.cls[0][insertAt] = "success";
+            $scope.selected.dat.splice(insertAt, 0, []);
+            sumCols($scope.tables[selIdx].dat, $scope.selected.dat[insertAt], tot[1]-1, tot[2]-1); // Depende de si se ha quitado el total
+            inserts++;
         });
       } else {
         // TODO: Quitar totales
