@@ -21,7 +21,7 @@ angular.module('app', ['components'])
   init();
   
   $scope.setUrl = function(url) {
-    $scope.url = "http://opendata.aragon.es/render/resource/"+url;
+    $scope.url = "http://opendata.aragon.es/catalogo/render/resource/"+url;
     //focus('focusMe');
     angular.element('input[autofocus]:visible:first').trigger('focus');
   }
