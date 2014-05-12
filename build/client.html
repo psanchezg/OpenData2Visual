@@ -22,7 +22,6 @@
         if (err) { return console.warn(err) }
         od2v.get("config.json", function(err, cfg, resHeaders) {
           if (err) { return console.warn(err) }
-          console.log(cfg[file]);
           if (cfg[file]) {
             // usar el mapper que recomienda la configuracion
             od2v[cfg[file].mapper] = od2v; // De momento solo hay uno

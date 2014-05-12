@@ -11,6 +11,7 @@
   forEach = @[namespace + "common"].forEach || fakeFn()
   transposeMtx = @[namespace + "common"].transposeMtx || fakeFn()
   isArray = @[namespace + "common"].isArray  || fakeFn()
+  isString = @[namespace + "common"].isString  || fakeFn()
 
   isntIndexTable = (table) ->
     table.dim[0] and table.dat and table.dim[0].length is table.dat.length and table.dim[1] and table.dat[0] and table.dim[1].length is table.dat[0].length
@@ -52,7 +53,7 @@
     forEach tables, ((table) ->
       # Filas y Columnas
       if not table.tot
-        table.tot = []
+        table.tot = [[], []]
       forEach [1, 0], (k) ->
         if k == 1
           j = removeTotalTable table.dat
@@ -61,7 +62,7 @@
 
         if j isnt null
           tot = table.dim[k].splice j, 1
-          table.tot[k] = tot
+          table.tot[k].push tot
           if k == 0
             table.dat.splice j, 1
         
@@ -74,40 +75,53 @@
     # 1. Recorrer filas y ver si grupos CNAE2009
     groups = []
     order = 0
+    new_dims = []
+    new_dat = []
+    has_subgroups = false;
     forEach table.dim[0], ((row, idx) ->
-      cnae = Number(row.substring(0, row.indexOf(" ")))
-      if not isNaN(cnae)
+      new_dims.push row
+      new_dat.push table.dat[idx]
+      console.log "ROW", typeof row, row
+      cnae = (if (row and isString(row)) then row.substring(0, row.indexOf(" ")) else row)
+      if not isNaN(Number(cnae))
         # Es un cnae. agrupar
-        if cnae < 100
-          if not @[cnae]
+        if cnae.length == 2
+          if not @[Number(cnae)]
             obj =
               title: row
               from: idx-order
               to: idx-order
               order: order 
 
-            @[cnae] = obj
-            table.dat.splice(idx-order, 1)
+            @[Number(cnae)] = obj
             order++
-        else
+            new_dims.splice new_dims.length-1, 1
+            new_dat.splice new_dat.length-1, 1
+        else if cnae.length == 3
           # Es un subgrupo. añadir elementos
-          cnae = Math.floor(cnae / 10)
-          @[cnae].from = Math.min(@[cnae].from, idx-order)
-          @[cnae].to = Math.max(@[cnae].to, idx-order)
-
+          has_subgroups = true
+          cnae = cnae.substring(0,2)
+          @[Number(cnae)].from = Math.min(@[Number(cnae)].from, idx-order)
+          @[Number(cnae)].to = Math.max(@[Number(cnae)].to, idx-order)
     ), groups
-    # Clean nulls
-    groups = groups.filter (x) -> x
-    sortarr = groups.sort((a, b) ->
-      a.order - b.order
-    )
-    if not table.tot[0]
-      table.tot[0] = []
-    forEach groups, ((group, idx) ->
-      obj = {}
-      obj[group.title] = [group.from, group.to]
-      @.push obj
-    ), table.tot[0]
+
+    if has_subgroups
+        table.dim[0] = new_dims
+        table.dat = new_dat
+    
+        if groups.length == 0
+            table
+        
+        # Clean nulls
+        groups = groups.filter (x) -> x
+        # Sort
+        sortarr = groups.sort((a, b) ->
+          a.order - b.order
+        )
+        forEach groups, ((group, idx) ->
+          @.push [group.title, group.from, group.to]
+        ), table.tot[0]
+
     table
 
   groupCNAE2009  = (tables) ->

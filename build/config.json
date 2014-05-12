@@ -1,6 +1,6 @@
 {
-  "DIRCE2012.json": {
+  ".*DIRCE.*": {
     "mapper": "jsonAsExcel",
-    "analyzers": ["removeIndex", "extractTotals", "groupCNAE2009"]
+    "analyzers": ["removeIndex", "groupCNAE2009", "extractTotals"]
   }
 }
