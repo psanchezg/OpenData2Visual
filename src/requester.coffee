@@ -19,6 +19,7 @@
           data += chunk
         res.on 'end', () ->
           try
+            data = data.replace /&#34;/g, '"'
             data = JSON.parse(data)
           catch e
             return callback(e)
@@ -37,7 +38,8 @@
       xhr.open "GET", url, true
       xhr.onload = ->
         try
-          data = JSON.parse(xhr.responseText)
+          data = xhr.responseText.replace /&#34;/g, '"'
+          data = JSON.parse(data)
         catch e
           return callback(e)
 
